@@ -36,14 +36,30 @@ for item in due_soon:
 
     message += f"- {name} (Due {due.date()} @ {due.time()})\n"
 
+def send_notification(message):
+    requests.post(
+        "https://api.pushover.net/1/messages.json",
+        data={
+            "token": os.getenv("pushover_api"),
+            "user": os.getenv("pushover_user"),
+            "message": message
+        }
+    )
 
-requests.post(
-    "https://api.pushover.net/1/messages.json",
-    data={
-        "token": os.getenv("pushover_api"),
-        "user": os.getenv("pushover_user"),
-        "message": message
-    }
-)
+if not os.path.exists("canvas_summary.txt"):
 
-print(message)
+    with open("canvas_summary.txt", "w") as f:
+        f.write(message)
+
+    send_notification(message)
+else:
+    with open("canvas_summary.txt", "r+") as f:
+        existing_content = f.read()
+        
+        if existing_content != message:
+            f.seek(0)
+            f.write(message)
+            f.truncate()
+
+            send_notification(message)
+
