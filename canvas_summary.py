@@ -33,8 +33,11 @@ for item in due_soon:
 
     due = datetime.fromisoformat(item["assignment"]["due_at"].replace("Z", "+00:00"))
     due -= timedelta(hours=6)
-
-    message += f"- {name} (Due {due.date()} @ {due.time()})\n"
+    
+    if due.date() == now.date():
+        message += f"- {name} (Due Today @ {due.time()})\n"
+    else:
+        message += f"- {name} (Due {due.date()} @ {due.time()})\n"
 
 def send_notification(message):
     requests.post(
