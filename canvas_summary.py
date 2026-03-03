@@ -26,18 +26,22 @@ for item in items:
         if now <= due_date <= week_from_now:
             due_soon.append(item)
 
-message = "Assignments Due This Week:\n\n"
+message = ""
+weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 for item in due_soon:
     name = item["assignment"]["name"]
+    class_name = item["context_name"].split("-")[-1].capitalize().split(" ")[0]
+
+    class_name = "Physics" if "Introduction" in class_name else class_name
 
     due = datetime.fromisoformat(item["assignment"]["due_at"].replace("Z", "+00:00"))
     due -= timedelta(hours=6)
     
     if due.date() == now.date():
-        message += f"- {name} (Due Today @ {due.time()})\n"
+        message += f"- {class_name:<15}: {name} (Due Today @ {due.time()})\n"
     else:
-        message += f"- {name} (Due {due.date()} @ {due.time()})\n"
+        message += f"- {class_name:<15}: {name} (Due {weekdays[due.weekday()]} @ {due.time().hour}:{due.time().minute:02d})\n"
 
 def send_notification(message):
     requests.post(
@@ -66,3 +70,4 @@ else:
 
             send_notification(message)
 
+print(message)
